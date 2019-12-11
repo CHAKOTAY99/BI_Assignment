@@ -44,18 +44,19 @@ wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
 # target = np.array([1, 0, 0])
 
 # Input - outH is the sigmoid of netH
-netH = np.zeros((1, 4)).astype(np.float64)
-outH = np.zeros((1, 4)).astype(np.float64)
+# netH = np.zeros((1, 4)).astype(np.float64)
+# outH = np.zeros((1, 4)).astype(np.float64)
 
 # Output - outO is the sigmoid of netO
-netO = np.zeros((1, 3)).astype(np.float64)
-outO = np.zeros((1, 3)).astype(np.float64)
+# netO = np.zeros((1, 3)).astype(np.float64)
+# outO = np.zeros((1, 3)).astype(np.float64)
 
 # Error storage
-errorStore = np.array([0, 0, 0], dtype=np.float64)
+# errorStore = np.array([0, 0, 0], dtype=np.float64)
 
 # Facts per epoch storage; epoc number,good fact, bad fact
-epochStorage = np.array([0, 0, 0])
+epochStorage = [0, 0, 0]
+
 
 def setInputAndTarget(tSet):
     inputString = tSet[31, 0]
@@ -83,7 +84,7 @@ def feedforward(feed, goal):
     errorList = [0, 0, 0]
     i = 0
     for eachNumber in outO:
-        newNum = np.subtract(target[i], eachNumber).astype(np.float64)
+        newNum = np.subtract(goal[i], eachNumber).astype(np.float64)
         errorList[i] = newNum
         i = i + 1
 
@@ -96,17 +97,41 @@ def feedforward(feed, goal):
     return outO, errorList
 
 
+def checkError(errorList):
+    mu = 0.2
+    for error in errorList:
+        if error > mu:
+            return False
+    return True
+
+
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
-#
-# def mainFunction():
-#     while True:
-#         for eachSample in trainingSet:
-#             setInputAndTarget(eachSample, input, target)
-#
-#
 
+def mainFunction():
+    i = 0
+    while True:
+        # A fact is 1 training set of input and target
+        for eachSample in trainingSet:
+            itResult = setInputAndTarget(eachSample)
+            result = feedforward(itResult[0], itResult[1])
+            passFail = checkError(result[1])
+            if passFail == False:
+                # fact failed and call EBP
+                epochStorage[i, 2] += 1
+            elif passFail == True:
+                # fact passed and do nothing
+                epochStorage[i, 1] += 1
+            # End of Fact
+        #End of Epoch
+        i = i + 1
+        if i == 1000:
+            ## If we reached the 1000 epoch limit just stop it
+            break;
+        elif epochStorage[i, 2] == 0:
+            ## No errors - great you can stop
+            break
 
 itResult = setInputAndTarget(trainingSet)
 input = itResult[0]
