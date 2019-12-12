@@ -133,9 +133,59 @@ def mainFunction():
             ## No errors - great you can stop
             break
 
+
+def deltaOutFormula(outputList, targetList):
+    i = 0
+    deltaO = np.array([0, 0, 0])
+    for entry in outputList:
+        deltaO[i] = entry*(1-entry)*(targetList[i]-entry)
+        print("delta\n", deltaO[i])
+        i = i + 1
+    return deltaO
+
+
+def deltaHiddenFormula(deltaO, outputList):
+    i = 0
+    deltaH = np.array([0, 0, 0])
+    sigmoidEquation = np.dot(deltaO, wOut).astype(np.float64)
+    print("EPSILONSECTION", sigmoidEquation)
+    for entry in outputList:
+        deltaH[i] = entry*(1-entry)*sigmoidEquation
+        print("delta\n", deltaO[i])
+        i = i + 1
+    return deltaH
+
+
+def wOCalc(deltaList, outputList):
+    eta = 0.2
+    i = 0
+    wAdj = np.array([0, 0, 0], dtype=np.float64)
+    for delta in deltaList:
+        wAdj[i] = eta*delta*outputList[i]
+        i = i + 1
+    return wAdj
+
+
+def wOAdjust(adj):
+    for i in range(4):
+        for x in range(3):
+            wOut[i, x] += adj[x]
+
+
+
+def backPropogation(outputList, targetList):
+    eta = 0.2
+    deltaO = deltaOutFormula(outputList, targetList)
+    weightAdjust = wOCalc(deltaO, outputList)
+    wOAdjust(weightAdjust)
+    deltaH = deltaHiddenFormula(deltaO, outputList)
+
+
+print("wOut START\n", wOut)
 itResult = setInputAndTarget(trainingSet)
 input = itResult[0]
 target = itResult[1]
 result = feedforward(input, target)
-
+backPropogation(result[0], target)
+print("wOut END", wOut)
 print("Facts:\n", epochStorage)
