@@ -94,7 +94,7 @@ def feedforward(feed, goal):
     print("outO:\n", outO)
     print("Error Numbers:\n", errorList)
 
-    return outO, errorList
+    return outO, outH, errorList
 
 
 def checkError(errorList):
@@ -134,35 +134,41 @@ def mainFunction():
             break
 
 
-def deltaOutFormula(outputList, targetList):
+def deltaOFormula(outO, targetList):
     i = 0
     deltaO = np.array([0, 0, 0])
-    for entry in outputList:
+    for entry in outO:
         deltaO[i] = entry*(1-entry)*(targetList[i]-entry)
         print("delta\n", deltaO[i])
         i = i + 1
     return deltaO
 
-# summing all such products and multiplying by the derivative of the squashing function (Previous delta)
-def sigmoidDelta(deltaO):
 
+def sigmaDelta(deltaO, index):
+    sum = 0
+    x = 0
+    for delta in deltaO:
+        sum += delta * wOut[index, x]
+        x = x + 1
 
-def deltaHiddenFormula(deltaO, outputList):
+    return sum
+
+def deltaHFormula(deltaO, outH):
     i = 0
     deltaH = np.array([0, 0, 0])
-    for entry in outputList:
-        deltaH[i] = entry*(1-entry)*sigmoidDelta(deltaO)
+    for entry in outH:
+        deltaH[i] = entry*(1-entry)*sigmaDelta(deltaO, i)
         print("delta\n", deltaO[i])
         i = i + 1
     return deltaH
 
 
-def wOCalc(deltaList, outputList):
+def wOCalc(deltaList, outO):
     eta = 0.2
     i = 0
     wAdj = np.array([0, 0, 0], dtype=np.float64)
     for delta in deltaList:
-        wAdj[i] = eta*delta*outputList[i]
+        wAdj[i] = eta * delta * outO[i]
         i = i + 1
     return wAdj
 
@@ -174,12 +180,14 @@ def wOAdjust(adj):
 
 
 
-def backPropogation(outputList, targetList):
+def backPropogation(outO, outH, targetList):
     eta = 0.2
-    deltaO = deltaOutFormula(outputList, targetList)
-    weightAdjust = wOCalc(deltaO, outputList)
+    # Change weights of output - WOut
+    deltaO = deltaOFormula(outO, targetList)
+    weightAdjust = wOCalc(deltaO, outO)
     wOAdjust(weightAdjust)
-    deltaH = deltaHiddenFormula(deltaO, outputList)
+    # Use outH - Change weights of hidden - wIn
+    deltaH = deltaHFormula(deltaO, outH)
 
 
 print("wOut START\n", wOut)
@@ -187,6 +195,7 @@ itResult = setInputAndTarget(trainingSet)
 input = itResult[0]
 target = itResult[1]
 result = feedforward(input, target)
-backPropogation(result[0], target)
+backPropogation(result[0], result[1], target)
 print("wOut END", wOut)
+print("wIn END", wIn)
 print("Facts:\n", epochStorage)
