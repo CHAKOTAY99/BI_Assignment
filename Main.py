@@ -143,14 +143,15 @@ def deltaOutFormula(outputList, targetList):
         i = i + 1
     return deltaO
 
+# summing all such products and multiplying by the derivative of the squashing function (Previous delta)
+def sigmoidDelta(deltaO):
+
 
 def deltaHiddenFormula(deltaO, outputList):
     i = 0
     deltaH = np.array([0, 0, 0])
-    sigmoidEquation = np.dot(deltaO, wOut).astype(np.float64)
-    print("EPSILONSECTION", sigmoidEquation)
     for entry in outputList:
-        deltaH[i] = entry*(1-entry)*sigmoidEquation
+        deltaH[i] = entry*(1-entry)*sigmoidDelta(deltaO)
         print("delta\n", deltaO[i])
         i = i + 1
     return deltaH
