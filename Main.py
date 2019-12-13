@@ -59,7 +59,7 @@ epochStorage = [0, 0, 0]
 
 
 def setInputAndTarget(tSet):
-    inputString = tSet[31, 0]
+    inputString = tSet[0, 0]
     targetString = tSet[0, 1]
     inputMatrix = np.array([0, 0, 0, 0, 0])
     targetMatrix = np.array([0, 0, 0])
@@ -120,6 +120,7 @@ def mainFunction():
             if passFail == False:
                 # fact failed and call EBP
                 epochStorage[i, 2] += 1
+                backPropogation(result[0], result[1], itResult[1])
             elif passFail == True:
                 # fact passed and do nothing
                 epochStorage[i, 1] += 1
@@ -173,29 +174,47 @@ def wOCalc(deltaList, outO):
     return wAdj
 
 
+def wInCalc(deltaList, outH):
+    eta = 0.2
+    i = 0
+    wAdj = np.array([0, 0, 0, 0], dtype=np.float64)
+    for delta in deltaList:
+        wAdj[i] = eta* delta * outH[i]
+        i = i + 1
+    return wAdj
+
+
 def wOAdjust(adj):
     for i in range(4):
         for x in range(3):
             wOut[i, x] += adj[x]
 
+def wInAdjust(adj):
+    for i in range(5):
+        for x in range(4):
+            wIn[i, x] += adj[x]
 
 
 def backPropogation(outO, outH, targetList):
     eta = 0.2
     # Change weights of output - WOut
     deltaO = deltaOFormula(outO, targetList)
-    weightAdjust = wOCalc(deltaO, outO)
-    wOAdjust(weightAdjust)
-    # Use outH - Change weights of hidden - wIn
+    wOChange = wOCalc(deltaO, outO)
+    wOAdjust(wOChange)
+    # Change weights of hidden - wIn
     deltaH = deltaHFormula(deltaO, outH)
+    wInChange = wInCalc(deltaH, outH)
+    wInAdjust(wInChange)
 
 
-print("wOut START\n", wOut)
-itResult = setInputAndTarget(trainingSet)
-input = itResult[0]
-target = itResult[1]
-result = feedforward(input, target)
-backPropogation(result[0], result[1], target)
-print("wOut END", wOut)
-print("wIn END", wIn)
-print("Facts:\n", epochStorage)
+
+# print("wOut START\n", wOut)
+# itResult = setInputAndTarget(trainingSet)
+# input = itResult[0]
+# target = itResult[1]
+# result = feedforward(input, target)
+# backPropogation(result[0], result[1], target)
+# print("wOut END", wOut)
+# print("wIn END", wIn)
+# print("Facts:\n", epochStorage)
+mainFunction()
