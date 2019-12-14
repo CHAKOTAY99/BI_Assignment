@@ -110,7 +110,7 @@ def mainFunction():
                 tempArray[2] += 1
                 # print("fail ", fact)
                 ## backPropogation INPUT: outO, outH, targetList
-                backPropogation(ffResult[0], ffResult[1], factResult[1])
+                backPropogation(ffResult[0], ffResult[1], factResult[1], factResult[0])
             elif passFail == True:
                 # fact passed and do nothing
                 # print("fact pass")
@@ -166,12 +166,12 @@ def wOCalc(deltaList, outO):
     return wAdj
 
 
-def wInCalc(deltaList, outH):
+def wInCalc(deltaList, inputList):
     eta = 0.2
     i = 0
     wAdj = np.array([0, 0, 0, 0], dtype=np.float64)
     for delta in deltaList:
-        wAdj[i] = eta * delta * outH[i]
+        wAdj[i] = eta * delta * inputList[i]
         i = i + 1
     # print("NEW WEIGHT wIn: ", wAdj)
     return wAdj
@@ -188,7 +188,7 @@ def wInAdjust(adj):
             wIn[i, x] += adj[x]
 
 
-def backPropogation(outO, outH, targetList):
+def backPropogation(outO, outH, targetList, inputList):
     eta = 0.2
     # Change weights of output - WOut
     deltaO = deltaOFormula(outO, targetList)
@@ -198,7 +198,7 @@ def backPropogation(outO, outH, targetList):
     # Change weights of hidden - wIn
     deltaH = deltaHFormula(deltaO, outH)
     # print("deltaH\n", deltaH)
-    wInChange = wInCalc(deltaH, outH)
+    wInChange = wInCalc(deltaH, inputList)
     wInAdjust(wInChange)
 
 
