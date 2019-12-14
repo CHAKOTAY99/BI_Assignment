@@ -119,7 +119,7 @@ def mainFunction():
             # End of Fact
         #End of Epoch
         print("Temp Array ", tempArray)
-        if i == 50000:
+        if i == 100000:
             ## If we reached the 1000 epoch limit just stop it
             break
         elif tempArray[2] == 0:
@@ -142,7 +142,8 @@ def sigmaDelta(deltaO, index):
     sum = 0
     x = 0
     for delta in deltaO:
-        sum += delta * wOut[index, x]
+        value = wOut[index, x]
+        sum += (delta * wOut[index, x])
         x = x + 1
     return sum
 
@@ -150,7 +151,7 @@ def deltaHFormula(deltaO, outH):
     i = 0
     deltaH = np.array([0, 0, 0, 0], dtype=np.float64)
     for entry in outH:
-        deltaH[i] = entry*(1-entry)*(sigmaDelta(deltaO, i))
+        deltaH[i] = (entry*(1-entry)*(sigmaDelta(deltaO, i)))
         i = i + 1
     return deltaH
 
@@ -158,7 +159,7 @@ def deltaHFormula(deltaO, outH):
 def wOCalc(deltaList, outO):
     eta = 0.2
     i = 0
-    wAdj = np.array([0, 0, 0], dtype=np.float64)
+    wAdj = np.zeros(3, np.float64)
     for delta in deltaList:
         wAdj[i] = eta * delta * outO[i]
         i = i + 1
@@ -169,9 +170,9 @@ def wOCalc(deltaList, outO):
 def wInCalc(deltaList, inputList):
     eta = 0.2
     i = 0
-    wAdj = np.array([0, 0, 0, 0], dtype=np.float64)
+    wAdj = np.zeros(4, np.float64)
     for delta in deltaList:
-        wAdj[i] = eta * delta * inputList[i]
+        wAdj[i] = (eta * delta * inputList[i])
         i = i + 1
     # print("NEW WEIGHT wIn: ", wAdj)
     return wAdj
@@ -180,11 +181,13 @@ def wInCalc(deltaList, inputList):
 def wOAdjust(adj):
     for i in range(4):
         for x in range(3):
+            global wOut
             wOut[i, x] += adj[x]
 
 def wInAdjust(adj):
     for i in range(5):
         for x in range(4):
+            global wIn
             wIn[i, x] += adj[x]
 
 
