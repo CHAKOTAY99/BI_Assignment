@@ -43,8 +43,8 @@ wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
 def setInputAndTarget(fact):
     inputString = fact[0]
     targetString = fact[1]
-    inputMatrix = np.array([0, 0, 0, 0, 0])
-    targetMatrix = np.array([0, 0, 0])
+    inputMatrix = np.array([0, 0, 0, 0, 0], dtype=np.float64)
+    targetMatrix = np.array([0, 0, 0], dtype=np.float64)
     i = 0
     x = 0
     for aNumber in inputString:
@@ -59,6 +59,7 @@ def setInputAndTarget(fact):
 
 
 def feedforward(input, target):
+    # print("input and target ", input, target)
     netH = np.dot(input, wIn).astype(np.float64)
     outH = sigmoid(netH)
     netO = np.dot(outH, wOut).astype(np.float64)
@@ -82,7 +83,7 @@ def feedforward(input, target):
 def checkError(errorList):
     mu = 0.2
     for error in errorList:
-        if error > mu:
+        if abs(error) > mu:
             return False
     return True
 
@@ -107,18 +108,20 @@ def mainFunction():
                 # fact failed and call EBP
                 # print("fact fail")
                 tempArray[2] += 1
+                # print("fail ", fact)
                 ## backPropogation INPUT: outO, outH, targetList
                 backPropogation(ffResult[0], ffResult[1], factResult[1])
             elif passFail == True:
                 # fact passed and do nothing
                 # print("fact pass")
+                # print("pass ", fact)
                 tempArray[1] += 1
             # End of Fact
-        # print("Temp Array ", tempArray)
         #End of Epoch
-        if i == 30000:
+        print("Temp Array ", tempArray)
+        if i == 50000:
             ## If we reached the 1000 epoch limit just stop it
-            break;
+            break
         elif tempArray[2] == 0:
             ## No errors - great you can stop
             break
@@ -141,14 +144,13 @@ def sigmaDelta(deltaO, index):
     for delta in deltaO:
         sum += delta * wOut[index, x]
         x = x + 1
-
     return sum
 
 def deltaHFormula(deltaO, outH):
     i = 0
     deltaH = np.array([0, 0, 0, 0], dtype=np.float64)
     for entry in outH:
-        deltaH[i] = entry*(1-entry)*sigmaDelta(deltaO, i)
+        deltaH[i] = entry*(1-entry)*(sigmaDelta(deltaO, i))
         i = i + 1
     return deltaH
 
@@ -169,7 +171,7 @@ def wInCalc(deltaList, outH):
     i = 0
     wAdj = np.array([0, 0, 0, 0], dtype=np.float64)
     for delta in deltaList:
-        wAdj[i] = eta* delta * outH[i]
+        wAdj[i] = eta * delta * outH[i]
         i = i + 1
     # print("NEW WEIGHT wIn: ", wAdj)
     return wAdj
