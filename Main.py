@@ -119,7 +119,7 @@ def mainFunction():
             # End of Fact
         #End of Epoch
         print("Temp Array ", tempArray)
-        if i == 100000:
+        if i == 1000:
             ## If we reached the 1000 epoch limit just stop it
             break
         elif tempArray[2] == 0:
@@ -156,39 +156,49 @@ def deltaHFormula(deltaO, outH):
     return deltaH
 
 
-def wOCalc(deltaList, outO):
+def wOCalc(deltaList, outH):
     eta = 0.2
     i = 0
-    wAdj = np.zeros(3, np.float64)
-    for delta in deltaList:
-        wAdj[i] = eta * delta * outO[i]
+    # wAdj = np.zeros((4, 3), dtype=np.float64)
+    for output in outH:
+        x = 0
+        for delta in deltaList:
+            wOut[i][x] += eta * delta * output
+            x = x + 1
         i = i + 1
-    # print("NEW WEIGHT w0: ", wAdj)
-    return wAdj
+    # print("NEW NEW wAdj\n", wAdj)
+    # return wAdj
 
 
 def wInCalc(deltaList, inputList):
     eta = 0.2
     i = 0
-    wAdj = np.zeros(4, np.float64)
-    for delta in deltaList:
-        wAdj[i] = (eta * delta * inputList[i])
+    # wAdj = np.zeros(4, np.float64)
+    # for delta in deltaList:
+    #     wAdj[i] = (eta * delta * inputList[i])
+    #     i = i + 1
+    # # print("NEW WEIGHT wIn: ", wAdj)
+    # return wAdj
+    for input in inputList:
+        x = 0
+        for delta in deltaList:
+            wIn[i][x] += eta * delta * input
+            x = x + 1
         i = i + 1
-    # print("NEW WEIGHT wIn: ", wAdj)
-    return wAdj
 
 
-def wOAdjust(adj):
-    for i in range(4):
-        for x in range(3):
-            global wOut
-            wOut[i, x] += adj[x]
 
-def wInAdjust(adj):
-    for i in range(5):
-        for x in range(4):
-            global wIn
-            wIn[i, x] += adj[x]
+# def wOAdjust(adj):
+#     for i in range(4):
+#         for x in range(3):
+#             global wOut
+#             wOut[i, x] += adj[x]
+
+# def wInAdjust(adj):
+#     for i in range(5):
+#         for x in range(4):
+#             global wIn
+#             wIn[i, x] += adj[x]
 
 
 def backPropogation(outO, outH, targetList, inputList):
@@ -196,13 +206,15 @@ def backPropogation(outO, outH, targetList, inputList):
     # Change weights of output - WOut
     deltaO = deltaOFormula(outO, targetList)
     # print("deltaO\n", deltaO)
-    wOChange = wOCalc(deltaO, outO)
-    wOAdjust(wOChange)
+    wOCalc(deltaO, outH)
+    # wOChange = wOCalc(deltaO, outO)
+    # wOAdjust(wOChange)
     # Change weights of hidden - wIn
     deltaH = deltaHFormula(deltaO, outH)
     # print("deltaH\n", deltaH)
-    wInChange = wInCalc(deltaH, inputList)
-    wInAdjust(wInChange)
+    wInCalc(deltaH, inputList)
+    # wInChange = wInCalc(deltaH, inputList)
+    # wInAdjust(wInChange)
 
 
 
