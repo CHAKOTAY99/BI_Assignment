@@ -35,9 +35,6 @@ trainingSet = np.array([["00000", "100"],
                         ["11111", "011"],
                         ])
 
-# Weights random assignment between -1 and 1
-wIn = np.random.uniform(low=-1, high=1, size=(5, 4))
-wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
 
 
 def setInputAndTarget(fact):
@@ -53,12 +50,10 @@ def setInputAndTarget(fact):
     for aNumber in targetString:
         targetMatrix[x] = aNumber
         x = x + 1
-    # print("input\n", inputMatrix)
-    # print("target\n", targetMatrix)
     return inputMatrix, targetMatrix
 
 
-def feedforward(input, target):
+def feedforward(input, target, wIn, wOut):
     # print("input and target ", input, target)
     netH = np.dot(input, wIn).astype(np.float64)
     outH = sigmoid(netH)
@@ -70,12 +65,6 @@ def feedforward(input, target):
         newNum = np.subtract(target[i], eachNumber)
         errorList[i] = newNum
         i = i + 1
-
-    # print("netH:\n", netH)
-    # print("outH:\n", outH)
-    # print("netO:\n", netO)
-    # print("outO:\n", outO)
-    # print("Error Numbers:\n", errorList)
 
     return outO, outH, errorList
 
@@ -93,38 +82,37 @@ def sigmoid(x):
 
 
 def mainFunction():
+    # Weights random assignment between -1 and 1
+    wIn = np.random.uniform(low=-1, high=1, size=(5, 4))
+    wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
     i = 0
     while True:
         ## tempArray good - bad fact
-        tempArray = np.array([i, 0, 0])
+        epochStorage = np.array([i, 0, 0])
         # EPOCH START
         for fact in trainingSet:
             ## setInputAndTarget OUTPUT: inputMarix and targetMatrix in that order INPUT: fact
             factResult = setInputAndTarget(fact)
             ## feedforward OUTPUT: outO, outH and errorList in that order INPUT: input matrix, target matrix
-            ffResult = feedforward(factResult[0], factResult[1])
+            ffResult = feedforward(factResult[0], factResult[1], wIn, wOut)
             passFail = checkError(ffResult[2])
             if passFail == False:
                 # fact failed and call EBP
-                # print("fact fail")
-                tempArray[2] += 1
-                # print("fail ", fact)
+                epochStorage[2] += 1
                 ## backPropogation INPUT: outO, outH, targetList
-                backPropogation(ffResult[0], ffResult[1], factResult[1], factResult[0])
+                backPropogation(ffResult[0], ffResult[1], factResult[1], factResult[0], wIn, wOut)
             elif passFail == True:
                 # fact passed and do nothing
-                # print("fact pass")
-                # print("pass ", fact)
-                tempArray[1] += 1
+                epochStorage[1] += 1
             # End of Fact
         #End of Epoch
-        print("Temp Array ", tempArray)
+        print("Temp Array ", epochStorage)
         if i == 1000:
             ## If we reached the 1000 epoch limit just stop it
-            break
-        elif tempArray[2] == 0:
+            return epochStorage
+        elif epochStorage[2] == 0:
             ## No errors - great you can stop
-            break
+            return epochStorage
         # Add new line to epoch storage
         i = i + 1
 
@@ -138,47 +126,37 @@ def deltaOFormula(outO, targetList):
     return deltaO
 
 
-def sigmaDelta(deltaO, index):
+def sigmaDelta(deltaO, index, wOut):
     sum = 0
     x = 0
     for delta in deltaO:
-        value = wOut[index, x]
         sum += (delta * wOut[index, x])
         x = x + 1
     return sum
 
-def deltaHFormula(deltaO, outH):
+def deltaHFormula(deltaO, outH, wOut):
     i = 0
     deltaH = np.array([0, 0, 0, 0], dtype=np.float64)
     for entry in outH:
-        deltaH[i] = (entry*(1-entry)*(sigmaDelta(deltaO, i)))
+        deltaH[i] = (entry*(1-entry)*(sigmaDelta(deltaO, i, wOut)))
         i = i + 1
     return deltaH
 
 
-def wOCalc(deltaList, outH):
+def wOCalc(deltaList, outH, wOut):
     eta = 0.2
     i = 0
-    # wAdj = np.zeros((4, 3), dtype=np.float64)
     for output in outH:
         x = 0
         for delta in deltaList:
             wOut[i][x] += eta * delta * output
             x = x + 1
         i = i + 1
-    # print("NEW NEW wAdj\n", wAdj)
-    # return wAdj
 
 
-def wInCalc(deltaList, inputList):
+def wInCalc(deltaList, inputList, wIn):
     eta = 0.2
     i = 0
-    # wAdj = np.zeros(4, np.float64)
-    # for delta in deltaList:
-    #     wAdj[i] = (eta * delta * inputList[i])
-    #     i = i + 1
-    # # print("NEW WEIGHT wIn: ", wAdj)
-    # return wAdj
     for input in inputList:
         x = 0
         for delta in deltaList:
@@ -187,35 +165,13 @@ def wInCalc(deltaList, inputList):
         i = i + 1
 
 
-
-# def wOAdjust(adj):
-#     for i in range(4):
-#         for x in range(3):
-#             global wOut
-#             wOut[i, x] += adj[x]
-
-# def wInAdjust(adj):
-#     for i in range(5):
-#         for x in range(4):
-#             global wIn
-#             wIn[i, x] += adj[x]
-
-
-def backPropogation(outO, outH, targetList, inputList):
-    eta = 0.2
+def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
     # Change weights of output - WOut
     deltaO = deltaOFormula(outO, targetList)
-    # print("deltaO\n", deltaO)
-    wOCalc(deltaO, outH)
-    # wOChange = wOCalc(deltaO, outO)
-    # wOAdjust(wOChange)
+    wOCalc(deltaO, outH, wOut)
     # Change weights of hidden - wIn
-    deltaH = deltaHFormula(deltaO, outH)
-    # print("deltaH\n", deltaH)
-    wInCalc(deltaH, inputList)
-    # wInChange = wInCalc(deltaH, inputList)
-    # wInAdjust(wInChange)
-
+    deltaH = deltaHFormula(deltaO, outH, wOut)
+    wInCalc(deltaH, inputList, wIn)
 
 
 # print("wIn START\n", wIn)
@@ -224,7 +180,6 @@ def backPropogation(outO, outH, targetList, inputList):
 # result = feedforward(itResult[0], itResult[1])
 # backPropogation(result[0], result[1], itResult[1])
 # print("Facts:\n", epochStorage)
-
 
 mainFunction()
 
