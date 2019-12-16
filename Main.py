@@ -1,40 +1,48 @@
 import numpy as np
+import random
 
 # Training Set 2^5 = 32 ABCDE = ¬ACD # : 80% of 32 = 26, 20% = 6
-trainingSet = np.array([["00000", "100"],
-                        ["00001", "100"],
-                        ["00010", "101"],
-                        ["00011", "101"],
-                        ["00100", "110"],
-                        ["00101", "110"],
-                        ["00110", "111"],
-                        ["00111", "111"],
-                        ["01000", "100"],
-                        ["01001", "100"],
-                        ["01010", "101"],
-                        ["01011", "101"],
-                        ["01100", "110"],
-                        ["01101", "110"],
-                        ["01110", "111"],
-                        ["01111", "111"],
-                        ["10000", "000"],
-                        ["10001", "000"],
-                        ["10010", "001"],
-                        ["10011", "001"],
-                        ["10100", "010"],
-                        ["10101", "010"],
-                        ["10110", "011"],
-                        ["10111", "011"],
-                        ["11000", "000"],
-                        ["11001", "000"],
-                        ["11010", "001"],
-                        ["11011", "001"],
-                        ["11100", "010"],
-                        ["11101", "010"],
-                        ["11110", "011"],
-                        ["11111", "011"],
-                        ])
+dataSet = np.array([["00000", "100"],
+                    ["00001", "100"],
+                    ["00010", "101"],
+                    ["00011", "101"],
+                    ["00100", "110"],
+                    ["00101", "110"],
+                    ["00110", "111"],
+                    ["00111", "111"],
+                    ["01000", "100"],
+                    ["01001", "100"],
+                    ["01010", "101"],
+                    ["01011", "101"],
+                    ["01100", "110"],
+                    ["01101", "110"],
+                    ["01110", "111"],
+                    ["01111", "111"],
+                    ["10000", "000"],
+                    ["10001", "000"],
+                    ["10010", "001"],
+                    ["10011", "001"],
+                    ["10100", "010"],
+                    ["10101", "010"],
+                    ["10110", "011"],
+                    ["10111", "011"],
+                    ["11000", "000"],
+                    ["11001", "000"],
+                    ["11010", "001"],
+                    ["11011", "001"],
+                    ["11100", "010"],
+                    ["11101", "010"],
+                    ["11110", "011"],
+                    ["11111", "011"],
+                    ])
 
+
+def randomTrainingSet(dataSet):
+    array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    random.shuffle(dataSet)
+    trainingSet = dataSet[:26]
+    testSet = dataSet[26:]
+    return trainingSet, testSet
 
 
 def setInputAndTarget(fact):
@@ -85,28 +93,28 @@ def mainFunction():
     # Weights random assignment between -1 and 1
     wIn = np.random.uniform(low=-1, high=1, size=(5, 4))
     wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
+    resultSet = randomTrainingSet(dataSet)
     i = 0
     while True:
         ## tempArray good - bad fact
         epochStorage = np.array([i, 0, 0])
         # EPOCH START
-        for fact in trainingSet:
+        for fact in resultSet[0]:
             ## setInputAndTarget OUTPUT: inputMarix and targetMatrix in that order INPUT: fact
             factResult = setInputAndTarget(fact)
-            ## feedforward OUTPUT: outO, outH and errorList in that order INPUT: input matrix, target matrix
+            ## feedforward OUTPUT: outO, outH and errorList in that order INPUT: input matrix, target matrix, wIn, wOut
             ffResult = feedforward(factResult[0], factResult[1], wIn, wOut)
             passFail = checkError(ffResult[2])
             if passFail == False:
                 # fact failed and call EBP
                 epochStorage[2] += 1
-                ## backPropogation INPUT: outO, outH, targetList
+                ## backPropogation INPUT: outO, outH, targetList, wIn, wOut
                 backPropogation(ffResult[0], ffResult[1], factResult[1], factResult[0], wIn, wOut)
             elif passFail == True:
                 # fact passed and do nothing
                 epochStorage[1] += 1
             # End of Fact
-        #End of Epoch
-        print("Temp Array ", epochStorage)
+        # End of Epoch
         if i == 1000:
             ## If we reached the 1000 epoch limit just stop it
             return epochStorage
@@ -121,7 +129,7 @@ def deltaOFormula(outO, targetList):
     i = 0
     deltaO = np.array([0, 0, 0], dtype=np.float64)
     for entry in outO:
-        deltaO[i] = entry*(1-entry)*(targetList[i]-entry)
+        deltaO[i] = entry * (1 - entry) * (targetList[i] - entry)
         i = i + 1
     return deltaO
 
@@ -134,11 +142,12 @@ def sigmaDelta(deltaO, index, wOut):
         x = x + 1
     return sum
 
+
 def deltaHFormula(deltaO, outH, wOut):
     i = 0
     deltaH = np.array([0, 0, 0, 0], dtype=np.float64)
     for entry in outH:
-        deltaH[i] = (entry*(1-entry)*(sigmaDelta(deltaO, i, wOut)))
+        deltaH[i] = (entry * (1 - entry) * (sigmaDelta(deltaO, i, wOut)))
         i = i + 1
     return deltaH
 
@@ -174,15 +183,6 @@ def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
     wInCalc(deltaH, inputList, wIn)
 
 
-# print("wIn START\n", wIn)
-# print("wOut START\n", wOut)
-# itResult = setInputAndTarget(trainingSet)
-# result = feedforward(itResult[0], itResult[1])
-# backPropogation(result[0], result[1], itResult[1])
-# print("Facts:\n", epochStorage)
-
-mainFunction()
-
-# print("wIn END\n", wIn)
-# print("wOut END\n", wOut)
-# print("EPOCHSTORAGE\n", epochStorage)
+epochStorage = mainFunction()
+print(epochStorage)
+randomTrainingSet(dataSet)
