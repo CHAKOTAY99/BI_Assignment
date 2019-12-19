@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import plotly.graph_objects as px
 
 # Training Set 2^5 = 32 ABCDE = ¬ACD # : 80% of 32 = 26, 20% = 6
 dataSet = np.array([["00000", "100"],
@@ -62,7 +63,6 @@ def setInputAndTarget(fact):
 
 
 def feedforward(input, target, wIn, wOut):
-    # print("input and target ", input, target)
     netH = np.dot(input, wIn).astype(np.float64)
     outH = sigmoid(netH)
     netO = np.dot(outH, wOut).astype(np.float64)
@@ -70,8 +70,7 @@ def feedforward(input, target, wIn, wOut):
     errorList = np.array([0, 0, 0], dtype=np.float64)
     i = 0
     for eachNumber in outO:
-        newNum = np.subtract(target[i], eachNumber)
-        errorList[i] = newNum
+        errorList[i] = np.subtract(target[i], eachNumber)
         i = i + 1
 
     return outO, outH, errorList
@@ -94,9 +93,13 @@ def mainFunction():
     wIn = np.random.uniform(low=-1, high=1, size=(5, 4))
     wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
     resultSet = randomTrainingSet(dataSet)
+    totalEpochs = [5, 4, 3]
+    test = [0, 1, 2]
+    totalEpochs.append(test)
+    print(totalEpochs)
     i = 0
     while True:
-        ## tempArray good - bad fact
+        ## epochStorage good - bad fact
         epochStorage = np.array([i, 0, 0])
         # EPOCH START
         for fact in resultSet[0]:
@@ -184,5 +187,5 @@ def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
 
 
 epochStorage = mainFunction()
-print(epochStorage)
+# print(epochStorage)
 randomTrainingSet(dataSet)
