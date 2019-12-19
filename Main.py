@@ -1,6 +1,7 @@
 import numpy as np
 import random
-import plotly.graph_objects as px
+import plotly.graph_objects as go
+import plotly.express as px
 
 # Training Set 2^5 = 32 ABCDE = ¬ACD # : 80% of 32 = 26, 20% = 6
 dataSet = np.array([["00000", "100"],
@@ -93,14 +94,11 @@ def mainFunction():
     wIn = np.random.uniform(low=-1, high=1, size=(5, 4))
     wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
     resultSet = randomTrainingSet(dataSet)
-    totalEpochs = [5, 4, 3]
-    test = [0, 1, 2]
-    totalEpochs.append(test)
-    print(totalEpochs)
+    totalEpochStore =[]
     i = 0
     while True:
-        ## epochStorage good - bad fact
-        epochStorage = np.array([i, 0, 0])
+        ## epochStorage good - bad fact %tage
+        epochStorage = [i, 0, 0]
         # EPOCH START
         for fact in resultSet[0]:
             ## setInputAndTarget OUTPUT: inputMarix and targetMatrix in that order INPUT: fact
@@ -117,13 +115,16 @@ def mainFunction():
                 # fact passed and do nothing
                 epochStorage[1] += 1
             # End of Fact
+        epochStorage[1] = (epochStorage[1] / 26) * 100
+        epochStorage[2] = (epochStorage[2] / 26) * 100
+        totalEpochStore.append(epochStorage)
         # End of Epoch
         if i == 1000:
             ## If we reached the 1000 epoch limit just stop it
-            return epochStorage
+            return totalEpochStore
         elif epochStorage[2] == 0:
             ## No errors - great you can stop
-            return epochStorage
+            return totalEpochStore
         # Add new line to epoch storage
         i = i + 1
 
@@ -187,5 +188,4 @@ def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
 
 
 epochStorage = mainFunction()
-# print(epochStorage)
-randomTrainingSet(dataSet)
+print(epochStorage)
