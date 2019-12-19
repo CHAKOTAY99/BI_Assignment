@@ -189,3 +189,7 @@ def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
 
 epochStorage = mainFunction()
 print(epochStorage)
+# np.fromiter(epochStorage, dtype=int)
+newThing = np.frombuffer(epochStorage)
+print("---------------------\n")
+print(newThing)
