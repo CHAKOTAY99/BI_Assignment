@@ -123,11 +123,11 @@ def mainFunction():
         if i == 1000:
             ## If we reached the 1000 epoch limit just stop it
             totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
-            return totEpoch
+            return totEpoch, resultSet[1], wIn, wOut
         elif totEpoch[i, 2] == 0:
             ## No errors - great you can stop
             totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
-            return totEpoch
+            return totEpoch, resultSet[1], wIn, wOut
         # Add new line to epoch storage
         i = i + 1
 
@@ -202,5 +202,9 @@ def plotGraph(data):
     plt.title('Training Set')
     plt.show()
 
+
+# def runTestSet(testSet, wIn, wOut):
+
+
 epochStorage = mainFunction()
-plotGraph(epochStorage)
+plotGraph(epochStorage[0])
