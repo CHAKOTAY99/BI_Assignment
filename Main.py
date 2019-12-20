@@ -2,6 +2,7 @@ import numpy as np
 import random
 import sys
 import pandas as pd
+import matplotlib.pyplot as plt
 np.set_printoptions(threshold=sys.maxsize)
 
 # Training Set 2^5 = 32 ABCDE = ¬ACD # : 80% of 32 = 26, 20% = 6
@@ -193,9 +194,13 @@ def plotGraph(data):
                  index=data[0:, 0],
                  columns=data[0, 1:])
     reference.columns = ['GoodFacts', 'BadFacts']
-    print(reference)
+
+
+    reference.reset_index().plot(kind='line', x='index', y='BadFacts', color='red')
+    plt.xlabel('Epoch')
+    plt.ylabel('Bad Facts %')
+    plt.title('Training Set')
+    plt.show()
 
 epochStorage = mainFunction()
-print(epochStorage)
-print("-----------------------")
 plotGraph(epochStorage)
