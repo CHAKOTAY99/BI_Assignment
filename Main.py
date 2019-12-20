@@ -185,14 +185,21 @@ def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
     deltaH = deltaHFormula(deltaO, outH, wOut)
     wInCalc(deltaH, inputList, wIn)
 
-def plotGraph(data):
-    reference = pd.DataFrame(data=data[0:, 1:],
-                 index=data[0:, 0],
-                 columns=data[0, 1:])
-    reference.columns = ['GoodFacts', 'BadFacts']
+def plotGraph(trainingData, testData):
+    training = pd.DataFrame(data=trainingData[0:, 1:],
+                             index=trainingData[0:, 0],
+                             columns=trainingData[0, 1:])
+    training.columns = ['GoodFacts', 'BadFacts']
 
+    # test = pd.DataFrame(data=testData[0:],
+    #                     index=testData[0],
+    #                     columns=testData[0:])
+    # test.columns = ['GoodFacts', 'BadFacts']
 
-    reference.reset_index().plot(kind='line', x='index', y='BadFacts', color='red')
+    training.reset_index().plot(kind='line', x='index', y='BadFacts', color='red')
+    # test.reset_index().plot(kind='line', x='index', y='BadFacts', color='green')
+    # plt.plot(testData) ## works
+    plt.scatter(x=testData[0], y=testData[2], c='green')
     plt.xlabel('Epoch')
     plt.ylabel('Bad Facts %')
     plt.title('Training Set')
@@ -221,5 +228,5 @@ def runTestSet(testSet, wIn, wOut):
 
 epochStorage = mainFunction()
 testStorage = runTestSet(epochStorage[1], epochStorage[2], epochStorage[3])
-plotGraph(epochStorage[0])
+plotGraph(epochStorage[0], testStorage)
 print(testStorage)
