@@ -120,12 +120,8 @@ def mainFunction():
         totEpoch[i, 1] = (totEpoch[i, 1] / 26) * 100
         totEpoch[i, 2] = (totEpoch[i, 2] / 26) * 100
         # End of Epoch
-        if i == 1000:
+        if i == 1000 or totEpoch[i, 2] == 0:
             ## If we reached the 1000 epoch limit just stop it
-            totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
-            return totEpoch, resultSet[1], wIn, wOut
-        elif totEpoch[i, 2] == 0:
-            ## No errors - great you can stop
             totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
             return totEpoch, resultSet[1], wIn, wOut
         # Add new line to epoch storage
@@ -203,8 +199,27 @@ def plotGraph(data):
     plt.show()
 
 
-# def runTestSet(testSet, wIn, wOut):
-
+def runTestSet(testSet, wIn, wOut):
+    totEpoch = np.array([0, 0, 0], dtype=np.float64)
+    # EPOCH START
+    for fact in testSet:
+        ## setInputAndTarget OUTPUT: inputMarix and targetMatrix in that order INPUT: fact
+        factResult = setInputAndTarget(fact)
+        ## feedforward OUTPUT: outO, outH and errorList in that order INPUT: input matrix, target matrix, wIn, wOut
+        ffResult = feedforward(factResult[0], factResult[1], wIn, wOut)
+        passFail = checkError(ffResult[2])
+        if passFail == False:
+            # fact failed and call EBP
+            totEpoch[2] += 1
+        elif passFail == True:
+            # fact passed and do nothing
+            totEpoch[1] += 1
+        # End of Fact
+    totEpoch[1] = (totEpoch[1] / 6) * 100
+    totEpoch[2] = (totEpoch[2] / 6) * 100
+    return totEpoch
 
 epochStorage = mainFunction()
+testStorage = runTestSet(epochStorage[1], epochStorage[2], epochStorage[3])
 plotGraph(epochStorage[0])
+print(testStorage)
