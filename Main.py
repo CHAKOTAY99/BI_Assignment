@@ -1,7 +1,8 @@
 import numpy as np
 import random
-import plotly.graph_objects as go
-import plotly.express as px
+import sys
+import pandas as pd
+np.set_printoptions(threshold=sys.maxsize)
 
 # Training Set 2^5 = 32 ABCDE = ¬ACD # : 80% of 32 = 26, 20% = 6
 dataSet = np.array([["00000", "100"],
@@ -94,11 +95,11 @@ def mainFunction():
     wIn = np.random.uniform(low=-1, high=1, size=(5, 4))
     wOut = np.random.uniform(low=-1, high=1, size=(4, 3))
     resultSet = randomTrainingSet(dataSet)
-    totalEpochStore =[]
+    totEpoch = np.zeros((1000,3), dtype=np.float64)
     i = 0
     while True:
         ## epochStorage good - bad fact %tage
-        epochStorage = [i, 0, 0]
+        totEpoch[i, 0] = i
         # EPOCH START
         for fact in resultSet[0]:
             ## setInputAndTarget OUTPUT: inputMarix and targetMatrix in that order INPUT: fact
@@ -108,23 +109,24 @@ def mainFunction():
             passFail = checkError(ffResult[2])
             if passFail == False:
                 # fact failed and call EBP
-                epochStorage[2] += 1
+                totEpoch[i, 2] += 1
                 ## backPropogation INPUT: outO, outH, targetList, wIn, wOut
                 backPropogation(ffResult[0], ffResult[1], factResult[1], factResult[0], wIn, wOut)
             elif passFail == True:
                 # fact passed and do nothing
-                epochStorage[1] += 1
+                totEpoch[i, 1] += 1
             # End of Fact
-        epochStorage[1] = (epochStorage[1] / 26) * 100
-        epochStorage[2] = (epochStorage[2] / 26) * 100
-        totalEpochStore.append(epochStorage)
+        totEpoch[i, 1] = (totEpoch[i, 1] / 26) * 100
+        totEpoch[i, 2] = (totEpoch[i, 2] / 26) * 100
         # End of Epoch
         if i == 1000:
             ## If we reached the 1000 epoch limit just stop it
-            return totalEpochStore
-        elif epochStorage[2] == 0:
+            totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
+            return totEpoch
+        elif totEpoch[i, 2] == 0:
             ## No errors - great you can stop
-            return totalEpochStore
+            totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
+            return totEpoch
         # Add new line to epoch storage
         i = i + 1
 
@@ -186,10 +188,14 @@ def backPropogation(outO, outH, targetList, inputList, wIn, wOut):
     deltaH = deltaHFormula(deltaO, outH, wOut)
     wInCalc(deltaH, inputList, wIn)
 
+def plotGraph(data):
+    reference = pd.DataFrame(data=data[0:, 1:],
+                 index=data[0:, 0],
+                 columns=data[0, 1:])
+    reference.columns = ['GoodFacts', 'BadFacts']
+    print(reference)
 
 epochStorage = mainFunction()
 print(epochStorage)
-# np.fromiter(epochStorage, dtype=int)
-newThing = np.frombuffer(epochStorage)
-print("---------------------\n")
-print(newThing)
+print("-----------------------")
+plotGraph(epochStorage)
