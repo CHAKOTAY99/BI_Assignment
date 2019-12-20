@@ -121,7 +121,7 @@ def mainFunction():
         totEpoch[i, 2] = (totEpoch[i, 2] / 26) * 100
         # End of Epoch
         if i == 1000 or totEpoch[i, 2] == 0:
-            ## If we reached the 1000 epoch limit just stop it
+            ## If we reached the 1000 epoch limit just stop it or if no more bad epochs occur
             totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
             return totEpoch, resultSet[1], wIn, wOut
         # Add new line to epoch storage
@@ -191,14 +191,8 @@ def plotGraph(trainingData, testData):
                              columns=trainingData[0, 1:])
     training.columns = ['GoodFacts', 'BadFacts']
 
-    # test = pd.DataFrame(data=testData[0:],
-    #                     index=testData[0],
-    #                     columns=testData[0:])
-    # test.columns = ['GoodFacts', 'BadFacts']
-
     training.reset_index().plot(kind='line', x='index', y='BadFacts', color='red')
-    # test.reset_index().plot(kind='line', x='index', y='BadFacts', color='green')
-    # plt.plot(testData) ## works
+
     plt.scatter(x=testData[0], y=testData[2], c='green')
     plt.xlabel('Epoch')
     plt.ylabel('Bad Facts %')
@@ -216,10 +210,10 @@ def runTestSet(testSet, wIn, wOut):
         ffResult = feedforward(factResult[0], factResult[1], wIn, wOut)
         passFail = checkError(ffResult[2])
         if passFail == False:
-            # fact failed and call EBP
+            # fact failed
             totEpoch[2] += 1
         elif passFail == True:
-            # fact passed and do nothing
+            # fact passed
             totEpoch[1] += 1
         # End of Fact
     totEpoch[1] = (totEpoch[1] / 6) * 100
@@ -229,4 +223,3 @@ def runTestSet(testSet, wIn, wOut):
 epochStorage = mainFunction()
 testStorage = runTestSet(epochStorage[1], epochStorage[2], epochStorage[3])
 plotGraph(epochStorage[0], testStorage)
-print(testStorage)
