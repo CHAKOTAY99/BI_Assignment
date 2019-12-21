@@ -120,7 +120,7 @@ def mainFunction():
         totEpoch[i, 1] = (totEpoch[i, 1] / 26) * 100
         totEpoch[i, 2] = (totEpoch[i, 2] / 26) * 100
         # End of Epoch
-        if i == 1000 or totEpoch[i, 2] == 0:
+        if i >= 1000 or totEpoch[i, 2] == 0:
             ## If we reached the 1000 epoch limit just stop it or if no more bad epochs occur
             totEpoch = np.delete(totEpoch, np.s_[i+1:], axis=0)
             return totEpoch, resultSet[1], wIn, wOut
