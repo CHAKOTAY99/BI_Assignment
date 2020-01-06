@@ -52,10 +52,15 @@ Please see below the training set results and testing results;
 The following are improvements that would have been made should time have permitted.
 
 •	Separation of main class into separate classes
+
 •	Neater and nicer graphs
+
 •	Latest python version
+
 •	Proper git dependency checking by using ‘pipenv’ or another package managing tool to allow for easier setup for exam evaluation
+
 •	Documentation included in the README of the project with images
+
 •	Randomly generated Boolean function
 
 
